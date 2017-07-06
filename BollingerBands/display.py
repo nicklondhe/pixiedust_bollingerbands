@@ -18,6 +18,9 @@
 from pixiedust.display.display import Display
 from pixiedust.utils import Logger
 
+from bokeh.plotting import figure, output_notebook, show
+from bokeh.palettes import Blues
+
 @Logger()
 class BollingerBandsHandler(Display):
     """
@@ -26,9 +29,33 @@ class BollingerBandsHandler(Display):
     def doRender(self,handlerId):
         #TODO Add your code here
         #You can use the methods available in base Display class to construct the html markup that will be sent to the output cell
+        
+        workingPDF = self.entity.copy()
+        keyFields = self.options.get("keyFields")
+        valueFields = self.options.get("valueFields")
+        lineField = self.options.get("line")
+        patchFields = self.options.get("patch")
+
+        pArr = patchFields.split(",")
+        numPatches = len(pArr)
+
+        colors = Blues[numPatches if numPatches > 2 else 3][::-1]
+
+        output_notebook()
+        fig = figure()
+        i = 0
+        for p in pArr:
+            cat = workingPDF[workingPDF['name'] == p]
+            fig.patch(cat[keyFields], cat[valueFields], color=colors[i])
+            i = i + 1
+
+        cat = workingPDF[workingPDF['name'] == lineField]
+        fig.line(cat[keyFields], cat[valueFields], color='red', line_width=4)
+        show(fig)
+        #genScript, genDiv = components(fig)
 
         #Add html from a jinja2 template, the file must be located in the templates folder located under this file
-        self._addHTMLTemplate("helloWorld.html")
+        #self._addHTMLTemplate("helloWorld.html")
 
         #Note: you can embed the HTML directly in the file like so
         #self._addHTMLTemplateString("<div>Hello World</div>")
