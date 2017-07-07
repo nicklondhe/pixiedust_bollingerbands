@@ -18,7 +18,9 @@
 from pixiedust.display.display import Display
 from pixiedust.utils import Logger
 
-from bokeh.plotting import figure, output_notebook, show
+from bokeh.plotting import figure, show
+from bokeh.resources import CDN
+from bokeh.embed import file_html
 from bokeh.palettes import Blues
 
 @Logger()
@@ -41,8 +43,8 @@ class BollingerBandsHandler(Display):
 
         colors = Blues[numPatches if numPatches > 2 else 3][::-1]
 
-        output_notebook()
-        fig = figure()
+        #output_notebook(hide_banner=True)
+        fig = figure(height=336, width=740)
         i = 0
         for p in pArr:
             cat = workingPDF[workingPDF['name'] == p]
@@ -51,11 +53,12 @@ class BollingerBandsHandler(Display):
 
         cat = workingPDF[workingPDF['name'] == lineField]
         fig.line(cat[keyFields], cat[valueFields], color='red', line_width=4)
-        show(fig)
+        html = file_html(fig, CDN)
+        #show(fig)
         #genScript, genDiv = components(fig)
 
         #Add html from a jinja2 template, the file must be located in the templates folder located under this file
         #self._addHTMLTemplate("helloWorld.html")
 
         #Note: you can embed the HTML directly in the file like so
-        #self._addHTMLTemplateString("<div>Hello World</div>")
+        self._addHTMLTemplateString(html)
