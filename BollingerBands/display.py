@@ -23,6 +23,10 @@ from bokeh.resources import CDN
 from bokeh.embed import file_html
 from bokeh.palettes import Blues
 
+from bokeh.models import DatetimeTickFormatter
+
+import datetime as dt
+
 @Logger()
 class BollingerBandsHandler(Display):
     """
@@ -38,6 +42,8 @@ class BollingerBandsHandler(Display):
         lineField = self.options.get("line")
         patchFields = self.options.get("patch")
 
+        workingPDF[keyFields] = [dt.datetime.strptime(str(x), "%Y%m%d") for x in workingPDF[keyFields]]
+
         ht = int(self.options.get("height")) if "height" in self.options else 336
         wdth = int(self.options.get("width")) if "width" in self.options else 740
 
@@ -47,7 +53,10 @@ class BollingerBandsHandler(Display):
         colors = Blues[numPatches if numPatches > 2 else 3][::-1]
 
         #output_notebook(hide_banner=True)
-        fig = figure(height=ht, width=wdth)
+        fig = figure(height=ht, width=wdth, x_axis_type="datetime")
+        fig.xaxis.formatter = DatetimeTickFormatter(days="%D")
+        fig.toolbar_location = None
+
         i = 0
         for p in pArr:
             cat = workingPDF[workingPDF['name'] == p]
